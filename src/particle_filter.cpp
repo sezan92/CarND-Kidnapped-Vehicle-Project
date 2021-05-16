@@ -102,6 +102,24 @@ void ParticleFilter::dataAssociation(vector<LandmarkObs> predicted,
    *   during the updateWeights phase.
    */
 
+  std::cout << "INFO: Data association" << std::endl;
+  double distance, min_distance;
+  int min_iter;
+  
+  for (unsigned int i=0;i < predicted.size(); i++){
+    min_distance = 10000;
+    for (unsigned int j=0; j<observations.size(); j++){
+      distance =  dist(predicted[i].x, observations[j].x, predicted[i].y, observations[j].y);
+      if (distance < min_distance){
+        min_distance = distance;
+        min_iter = j;
+            }
+    }
+     std::cout << "INFO: nearest landmark for "<< predicted[i].x << " "<< predicted[i].y <<" is "<< observations[min_iter].x <<" "<< observations[min_iter].y << std::endl;
+    }
+  
+ 
+
 }
 
 void ParticleFilter::updateWeights(double sensor_range, double std_landmark[], 
