@@ -70,6 +70,7 @@ void ParticleFilter::prediction(double delta_t, double std_pos[],
    *  http://en.cppreference.com/w/cpp/numeric/random/normal_distribution
    *  http://www.cplusplus.com/reference/random/default_random_engine/
    */
+  std::cout << "INFO: prediction step" << std::endl;
   for (int i=0; i < num_particles; i++){
     double x0 = particles[i].x;
     double y0 = particles[i].y;
