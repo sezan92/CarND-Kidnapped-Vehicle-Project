@@ -40,7 +40,6 @@ void ParticleFilter::init(double x, double y, double theta, double std[]) {
   std::default_random_engine gen;
   num_particles = 100;  // TODO: Set the number of particles
   Particle particle;
-  std::vector <Particle> particles(0);
   for (int i=0; i< num_particles; i++){
     double sample_x, sample_y, sample_theta;
     
