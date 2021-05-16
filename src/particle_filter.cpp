@@ -62,6 +62,7 @@ void ParticleFilter::init(double x, double y, double theta, double std[]) {
 
 void ParticleFilter::prediction(double delta_t, double std_pos[], 
                                 double velocity, double yaw_rate) {
+  
   /**
    * TODO: Add measurements to each particle and add random Gaussian noise.
    * NOTE: When adding noise you may find std::normal_distribution 
@@ -69,6 +70,15 @@ void ParticleFilter::prediction(double delta_t, double std_pos[],
    *  http://en.cppreference.com/w/cpp/numeric/random/normal_distribution
    *  http://www.cplusplus.com/reference/random/default_random_engine/
    */
+  for (int i=0; i < num_particles; i++){
+    double x0 = particles[i].x;
+    double y0 = particles[i].y;
+    double theta0 = particles[i].theta;
+
+    particles[i].x = x0 + velocity / yaw_rate * (sin( theta0 + yaw_rate * delta_t) - sin(theta0));
+    particles[i].y = y0 + velocity / yaw_rate * (cos( theta0 + yaw_rate * delta_t) - cos(theta0));
+    particles[i].theta = theta0 + yaw_rate * delta_t ; 
+  }
 
 }
 
