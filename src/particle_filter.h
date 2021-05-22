@@ -12,6 +12,7 @@
 #include <string>
 #include <vector>
 #include "helper_functions.h"
+#include "map.h"
 
 struct Particle {
   int id;
@@ -120,6 +121,10 @@ class ParticleFilter {
   
   // Vector of weights of all particles
   std::vector<double> weights; 
+  std::vector<LandmarkObs> predict_landmark(std::vector<Map::single_landmark_s> landmark_list, double x, double y);
+  std::vector<LandmarkObs> transform_observations(const std::vector<LandmarkObs> &observations,  double x, double y, double theta);
 };
+
+
 
 #endif  // PARTICLE_FILTER_H_

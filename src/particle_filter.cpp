@@ -123,6 +123,29 @@ void ParticleFilter::dataAssociation(vector<LandmarkObs> predicted,
 
 }
 
+vector<LandmarkObs> ParticleFilter::transform_observations(const vector<LandmarkObs> &observations,  double x, double y, double theta){
+  vector<LandmarkObs> transformed_observations;
+  for (unsigned observe_iter=0; observe_iter < observations.size(); observe_iter++){
+    double x_new = cos(theta) * observations[observe_iter].x - sin(theta) * observations[observe_iter].y + x;
+    double y_new = sin(theta) * observations[observe_iter].y - cos(theta) * observations[observe_iter].x + y;
+    transformed_observations.push_back(LandmarkObs {observations[observe_iter].id, x, y});
+  }
+  return transformed_observations;
+}
+
+vector<LandmarkObs> ParticleFilter::predict_landmark(std::vector<Map::single_landmark_s> landmark_list, double x, double y)
+{
+  vector<LandmarkObs> predicted;
+  for(unsigned int map_iter=0; map_iter<landmark_list.size(); map_iter++ )
+    {
+      int id = landmark_list[map_iter].id_i;
+      double dx = x - landmark_list[map_iter].x_f;
+      double dy = y - landmark_list[map_iter].y_f;
+      predicted.push_back(LandmarkObs {id, dx, dy});
+    }
+  return predicted;
+
+}
 void ParticleFilter::updateWeights(double sensor_range, double std_landmark[], 
                                    const vector<LandmarkObs> &observations, 
                                    const Map &map_landmarks) {
@@ -139,6 +162,18 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
    *   and the following is a good resource for the actual equation to implement
    *   (look at equation 3.33) http://planning.cs.uiuc.edu/node99.html
    */
+  vector<Map::single_landmark_s> landmark_list = map_landmarks.landmark_list;
+  for(unsigned int i = 0; i< particles.size(); i++)
+  {
+    double x = particles[i].x;
+    double y = particles[i].y;
+    double theta = particles[i].theta;
+    vector<LandmarkObs> predicted = predict_landmark(landmark_list, x, y);
+    vector<LandmarkObs> transformed_observations = transform_observations(observations, x, y, theta);
+    dataAssociation(predicted, transformed_observations);
+  
+  }
+
 
 }
 
