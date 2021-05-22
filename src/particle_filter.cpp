@@ -133,7 +133,7 @@ vector<LandmarkObs> ParticleFilter::transform_observations(const vector<Landmark
   return transformed_observations;
 }
 
-vector<LandmarkObs> ParticleFilter::predict_landmark(std::vector<Map::single_landmark_s> landmark_list, double x, double y)
+vector<LandmarkObs> ParticleFilter::predict_landmark(std::vector<Map::single_landmark_s> landmark_list, double x, double y, double sensor_range)
 {
   vector<LandmarkObs> predicted;
   for(unsigned int map_iter=0; map_iter<landmark_list.size(); map_iter++ )
@@ -141,7 +141,7 @@ vector<LandmarkObs> ParticleFilter::predict_landmark(std::vector<Map::single_lan
       int id = landmark_list[map_iter].id_i;
       double dx = x - landmark_list[map_iter].x_f;
       double dy = y - landmark_list[map_iter].y_f;
-      predicted.push_back(LandmarkObs {id, dx, dy});
+      if(dx * dx + dy * dy <= sensor_range * sensor_range) predicted.push_back(LandmarkObs {id, dx, dy});
     }
   return predicted;
 
@@ -168,7 +168,7 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
     double x = particles[i].x;
     double y = particles[i].y;
     double theta = particles[i].theta;
-    vector<LandmarkObs> predicted = predict_landmark(landmark_list, x, y);
+    vector<LandmarkObs> predicted = predict_landmark(landmark_list, x, y, sensor_range);
     vector<LandmarkObs> transformed_observations = transform_observations(observations, x, y, theta);
     dataAssociation(predicted, transformed_observations);
   

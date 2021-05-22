@@ -121,7 +121,7 @@ class ParticleFilter {
   
   // Vector of weights of all particles
   std::vector<double> weights; 
-  std::vector<LandmarkObs> predict_landmark(std::vector<Map::single_landmark_s> landmark_list, double x, double y);
+  std::vector<LandmarkObs> predict_landmark(std::vector<Map::single_landmark_s> landmark_list, double x, double y, double sensor_range);
   std::vector<LandmarkObs> transform_observations(const std::vector<LandmarkObs> &observations,  double x, double y, double theta);
 };
 
