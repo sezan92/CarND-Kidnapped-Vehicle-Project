@@ -128,7 +128,7 @@ vector<LandmarkObs> ParticleFilter::transform_observations(const vector<Landmark
   for (unsigned observe_iter=0; observe_iter < observations.size(); observe_iter++){
     double x_new = cos(theta) * observations[observe_iter].x - sin(theta) * observations[observe_iter].y + x;
     double y_new = sin(theta) * observations[observe_iter].y - cos(theta) * observations[observe_iter].x + y;
-    transformed_observations.push_back(LandmarkObs {observations[observe_iter].id, x, y});
+    transformed_observations.push_back(LandmarkObs {observations[observe_iter].id, x_new, y_new});
   }
   return transformed_observations;
 }
@@ -171,7 +171,7 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
     vector<LandmarkObs> predicted = predict_landmark(landmark_list, x, y, sensor_range);
     vector<LandmarkObs> transformed_observations = transform_observations(observations, x, y, theta);
     dataAssociation(predicted, transformed_observations);
-  
+    //TODO: update weights using gaussian distribution
   }
 
 
