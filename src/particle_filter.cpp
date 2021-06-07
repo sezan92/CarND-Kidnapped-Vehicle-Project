@@ -40,7 +40,7 @@ void ParticleFilter::init(double x, double y, double theta, double std[]) {
   std::default_random_engine gen;
   num_particles = 100;  // TODO: Set the number of particles
   Particle particle;
-  for (int i=0; i< num_particles; i++){
+  for (unsigned int i=0; i< num_particles; i++){
     double sample_x, sample_y, sample_theta;
     
     sample_x = dist_x(gen);
@@ -123,7 +123,7 @@ void ParticleFilter::dataAssociation(vector<LandmarkObs> predicted,
 
 }
 
-vector<LandmarkObs> ParticleFilter::transform_observations(const vector<LandmarkObs> &observations,  double x, double y, double theta){
+vector<LandmarkObs> ParticleFilter::transform_observations(const vector<LandmarkObs> &observations,  double x, double y, double theta, double sensor_range){
   vector<LandmarkObs> transformed_observations;
   for (unsigned observe_iter=0; observe_iter < observations.size(); observe_iter++){
     double x_new = cos(theta) * observations[observe_iter].x - sin(theta) * observations[observe_iter].y + x;
@@ -169,8 +169,10 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
     double y = particles[i].y;
     double theta = particles[i].theta;
     vector<LandmarkObs> predicted = predict_landmark(landmark_list, x, y, sensor_range);
-    vector<LandmarkObs> transformed_observations = transform_observations(observations, x, y, theta);
+    vector<LandmarkObs> transformed_observations = transform_observations(observations, x, y, theta, sensor_range);
+    std::cout<<"Predicted size "<< predicted.size() <<", Observations size "<< transformed_observations.size()<<std::endl;
     dataAssociation(predicted, transformed_observations);
+    std::cout<<"Predicted size "<< predicted.size() <<", Observations size "<< transformed_observations.size()<<std::endl;
     //TODO: update weights using gaussian distribution
   }
 
