@@ -174,6 +174,13 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
     dataAssociation(predicted, transformed_observations);
     std::cout<<"Predicted size "<< predicted.size() <<", Observations size "<< transformed_observations.size()<<std::endl;
     //TODO: update weights using gaussian distribution
+    unsigned int k = 0;
+    bool found = false;
+    while ( !found && k<predicted.size()){
+      if predicted[k].id == mapped //TODO:
+
+
+    }
   }
 
 
