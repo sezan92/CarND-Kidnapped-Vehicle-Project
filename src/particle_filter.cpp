@@ -164,25 +164,38 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
    */
   vector<Map::single_landmark_s> landmark_list = map_landmarks.landmark_list;
   for(unsigned int i = 0; i< particles.size(); i++)
-  {
-    double x = particles[i].x;
-    double y = particles[i].y;
-    double theta = particles[i].theta;
-    vector<LandmarkObs> predicted = predict_landmark(landmark_list, x, y, sensor_range);
-    vector<LandmarkObs> transformed_observations = transform_observations(observations, x, y, theta, sensor_range);
-    std::cout<<"Predicted size "<< predicted.size() <<", Observations size "<< transformed_observations.size()<<std::endl;
-    dataAssociation(predicted, transformed_observations);
-    std::cout<<"Predicted size "<< predicted.size() <<", Observations size "<< transformed_observations.size()<<std::endl;
-    //TODO: update weights using gaussian distribution
-    unsigned int k = 0;
-    bool found = false;
-    while ( !found && k<predicted.size()){
-      if predicted[k].id == mapped //TODO:
+    {
+      double x = particles[i].x;
+      double y = particles[i].y;
+      double theta = particles[i].theta;
+      vector<LandmarkObs> predicted = predict_landmark(landmark_list, x, y, sensor_range);
+      vector<LandmarkObs> transformed_observations = transform_observations(observations, x, y, theta, sensor_range);
+      std::cout<<"Predicted size "<< predicted.size() <<", Observations size "<< transformed_observations.size()<<std::endl;
+      dataAssociation(predicted, transformed_observations);
+      std::cout<<"Predicted size "<< predicted.size() <<", Observations size "<< transformed_observations.size()<<std::endl;
+      //TODO: update weights using gaussian distribution
+      particles[i].weight = 1.0;
+      for (unsigned int j=0; j< transformed_observations.size(); j++){
+        unsigned int k = 0;
+        bool found = false;
+      
+        while ( !found && k<predicted.size() ){
+          
+          if (predicted[k].id == transformed_observations[j].id){
+            found = true;
+          
+        double dx = predicted[k].x - transformed_observations[j].x;
+        double dy = predicted[k].y - transformed_observations[j].y;
+        break;
+          }
+        
 
 
+      }
+        double weight = (1/(sqrt(2 * M_PI * std_landmark[0] * std_landmark[1]) * sqrt( 2 * M_PI * std_landmark[0] * std_landmark[1])) * exp(-pow(dx, 2)/ 2 * pow(std_landmark[0], 2) ) * exp(-pow(dy, 2)/ 2 * pow(std_landmark[1], 2)));
+        particles[i].weight *= weight; //TODO
     }
   }
-
 
 }
 
