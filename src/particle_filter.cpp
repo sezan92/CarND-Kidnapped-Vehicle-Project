@@ -23,7 +23,6 @@ using std::vector;
 using std::normal_distribution;
 
 
-
 void ParticleFilter::init(double x, double y, double theta, double std[]) {
   /**
    * TODO: Set the number of particles. Initialize all particles to 
@@ -40,7 +39,7 @@ void ParticleFilter::init(double x, double y, double theta, double std[]) {
   std::default_random_engine gen;
   num_particles = 100;  // TODO: Set the number of particles
   Particle particle;
-  for (unsigned int i=0; i< num_particles; i++){
+  for (int i=0; i< num_particles; i++){
     double sample_x, sample_y, sample_theta;
     
     sample_x = dist_x(gen);
@@ -107,12 +106,14 @@ void ParticleFilter::dataAssociation(vector<LandmarkObs> predicted,
   int min_iter_id;
   
   for (unsigned int i=0;i < observations.size(); i++){
-    min_distance = 10000;
+    min_distance = __DBL_MAX__;
+;
     for (unsigned int j=0; j<predicted.size(); j++){
       distance =  dist(predicted[i].x, observations[j].x, predicted[i].y, observations[j].y);
       if (distance < min_distance){
         min_distance = distance;
         min_iter_id = predicted[j].id;
+        std::cout<<"INFO:got minimum distance at "<< min_iter_id <<std::endl;  
             }
     }
   observations[i].id = min_iter_id;
@@ -175,22 +176,27 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
       std::cout<<"Predicted size "<< predicted.size() <<", Observations size "<< transformed_observations.size()<<std::endl;
       //TODO: update weights using gaussian distribution
       particles[i].weight = 1.0;
+      double dx = 0;
+      double dy = 0; 
       for (unsigned int j=0; j< transformed_observations.size(); j++){
         unsigned int k = 0;
         bool found = false;
       
         while ( !found && k<predicted.size() ){
-          
+           
           if (predicted[k].id == transformed_observations[j].id){
             found = true;
+            std::cout << "INFO: found the nearest landmark at id " << transformed_observations[j].id <<std::endl;
           
-        double dx = predicted[k].x - transformed_observations[j].x;
-        double dy = predicted[k].y - transformed_observations[j].y;
+        dx = predicted[k].x - transformed_observations[j].x;
+        dy = predicted[k].y - transformed_observations[j].y;
         break;
           }
         
+        
 
 
+      k++;
       }
         double weight = (1/(sqrt(2 * M_PI * std_landmark[0] * std_landmark[1]) * sqrt( 2 * M_PI * std_landmark[0] * std_landmark[1])) * exp(-pow(dx, 2)/ 2 * pow(std_landmark[0], 2) ) * exp(-pow(dy, 2)/ 2 * pow(std_landmark[1], 2)));
         particles[i].weight *= weight; //TODO
