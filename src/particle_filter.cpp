@@ -54,7 +54,7 @@ void ParticleFilter::init(double x, double y, double theta, double std[]) {
     particles.push_back(particle);
   }
 
-  std::cout<< "INFO: initialized Particles of length: "<< particles.size() << std::endl;
+  std::cout<< "INFO: initialized Particles of length: "<< num_particles << std::endl;
   is_initialized = true;
 
 }
@@ -164,7 +164,7 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
    *   (look at equation 3.33) http://planning.cs.uiuc.edu/node99.html
    */
   vector<Map::single_landmark_s> landmark_list = map_landmarks.landmark_list;
-  for(unsigned int i = 0; i< particles.size(); i++)
+  for(unsigned int i = 0; i< num_particles; i++)
     {
       double x = particles[i].x;
       double y = particles[i].y;
@@ -212,6 +212,22 @@ void ParticleFilter::resample() {
    * NOTE: You may find std::discrete_distribution helpful here.
    *   http://en.cppreference.com/w/cpp/numeric/random/discrete_distribution
    */
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::vector<double> weights;
+  for(unsigned int i=0; i< num_particles; i++){
+    weights.push_back(particles[i].weight);
+  }
+  std::discrete_distribution<> d(weights.begin(), weights.end());
+  
+  std::vector<Particle> new_particles;
+  for (unsigned int i = 0; i< num_particles; i++){
+    unsigned int idx = d(gen);
+    new_particles[i] = particles[idx];
+
+
+  }
+  particles = new_particles;
 
 }
 
