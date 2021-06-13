@@ -1,5 +1,5 @@
 # Overview
-This repository contains all the code needed to complete the final project for the Localization course in Udacity's Self-Driving Car Nanodegree.
+This is the repository about my implementation of Particle filter project of `Self Driving Car Nanodegree` programme. 
 
 ### Original README
 This Readme is updated from the [original readme file](README_original.md)
@@ -24,3 +24,11 @@ from the [original readme](README_original.md),
 Tips for setting up your environment can be found [here](https://classroom.udacity.com/nanodegrees/nd013/parts/40f38239-66b6-46ec-ae68-03afd8a601c8/modules/0949fca6-b379-42af-a919-ee50aa304e6a/lessons/f758c44c-5e40-4e01-93b5-1a82aa4e044f/concepts/23d376c7-0195-4276-bdf0-e02f1f3c665d)
 
 ```
+
+### Acknowledgements:
+
+I took help from other repositories, to debug my code. So , it is fair to mention them 
+
+- https://github.com/sohonisaurabh/CarND-Kidnapped-Vehicle-Project
+
+- https://github.com/darienmt/CarND-Kidnapped-Vehicle-P3
