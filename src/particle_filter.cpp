@@ -15,6 +15,7 @@
 #include <random>
 #include <string>
 #include <vector>
+#include <cstdlib>
 
 #include "helper_functions.h"
 
@@ -32,12 +33,12 @@ void ParticleFilter::init(double x, double y, double theta, double std[]) {
    * NOTE: Consult particle_filter.h for more information about this method 
    *   (and others in this file).
    */
-  std::cout << "INFO: Initializing Particle Filter" << std::endl;
+  //std::cout << "INFO: Initializing Particle Filter" << std::endl;
   normal_distribution<double> dist_x(x, std[0]);
   normal_distribution<double> dist_y(y, std[1]);
   normal_distribution<double> dist_theta(theta, std[2]);
   std::default_random_engine gen;
-  num_particles = 100;  // TODO: Set the number of particles
+  num_particles = 20;  // TODO: Set the number of particles
   Particle particle;
   for (int i=0; i< num_particles; i++){
     double sample_x, sample_y, sample_theta;
@@ -45,16 +46,19 @@ void ParticleFilter::init(double x, double y, double theta, double std[]) {
     sample_x = dist_x(gen);
     sample_y = dist_y(gen);
     sample_theta = dist_theta(gen);
-    
+    particle.id = i ;
     particle.x = sample_x;
     particle.y = sample_y;
-    particle.theta = sample_theta;
-    std::cout << "INFO: Sample " << i + 1 << " " << particle.x << " " << particle.y << " " << particle.theta << std::endl; 
+    particle.weight = 1;
+    particle.sense_x.push_back(x);
+    particle.sense_y.push_back(y);
+
+    //std::cout << "INFO: Sample " << i + 1 << " " << particle.x << " " << particle.y << " " << particle.theta << std::endl; 
 
     particles.push_back(particle);
   }
 
-  std::cout<< "INFO: initialized Particles of length: "<< num_particles << std::endl;
+  //std::cout<< "INFO: initialized Particles of length: "<< num_particles << std::endl;
   is_initialized = true;
 
 }
@@ -69,7 +73,7 @@ void ParticleFilter::prediction(double delta_t, double std_pos[],
    *  http://en.cppreference.com/w/cpp/numeric/random/normal_distribution
    *  http://www.cplusplus.com/reference/random/default_random_engine/
    */
-  std::cout << "INFO: prediction step" << std::endl;
+  //std::cout << "INFO: prediction step" << std::endl;
   for (int i=0; i < num_particles; i++){
     double x0 = particles[i].x;
     double y0 = particles[i].y;
@@ -101,7 +105,7 @@ void ParticleFilter::dataAssociation(vector<LandmarkObs> predicted,
    *   during the updateWeights phase.
    */
 
-  std::cout << "INFO: Data association" << std::endl;
+  //std::cout << "INFO: Data association" << std::endl;
   double distance, min_distance;
   int min_iter_id;
   
@@ -109,14 +113,14 @@ void ParticleFilter::dataAssociation(vector<LandmarkObs> predicted,
     min_distance = __DBL_MAX__;
 ;
     for (unsigned int j=0; j<predicted.size(); j++){
-      distance =  dist(predicted[i].x, observations[j].x, predicted[i].y, observations[j].y);
+      distance =  dist(predicted[i].x, predicted[i].y, observations[j].x, observations[j].y);
       if (distance < min_distance){
         min_distance = distance;
         min_iter_id = observations[i].id;
-        std::cout<<"INFO:got minimum distance at "<< min_iter_id <<std::endl;  
+        //std::cout<<"INFO:got minimum distance at "<< min_iter_id <<std::endl;  
             }
       predicted[j].id = min_iter_id;
-      std::cout << "INFO: nearest landmark id for "<< observations[i].x << " "<< observations[i].y <<" is "<< observations[i].id << std::endl;
+      //std::cout << "INFO: nearest landmark id for "<< observations[i].x << " "<< observations[i].y <<" is "<< observations[i].id << std::endl;
     }
   
  
@@ -126,7 +130,10 @@ void ParticleFilter::dataAssociation(vector<LandmarkObs> predicted,
 
 }
 
-vector<LandmarkObs> ParticleFilter::transform_observations(const vector<LandmarkObs> &observations,  double x, double y, double theta, double sensor_range){
+vector<LandmarkObs> ParticleFilter::transform_observations(const vector<LandmarkObs> &observations,  Particle particle){
+  double x = particle.x;
+  double y = particle.y;
+  double theta = particle.theta;
   vector<LandmarkObs> transformed_observations;
   for (unsigned observe_iter=0; observe_iter < observations.size(); observe_iter++){
     double x_new = cos(theta) * observations[observe_iter].x - sin(theta) * observations[observe_iter].y + x;
@@ -136,16 +143,20 @@ vector<LandmarkObs> ParticleFilter::transform_observations(const vector<Landmark
   return transformed_observations;
 }
 
-vector<LandmarkObs> ParticleFilter::predict_landmark(std::vector<Map::single_landmark_s> landmark_list, double x, double y, double sensor_range)
+vector<LandmarkObs> ParticleFilter::predict_landmark(std::vector<Map::single_landmark_s> landmark_list, Particle particle, double sensor_range)
 {
   vector<LandmarkObs> predicted;
+  double x = particle.x;
+  double y = particle.y;
+  
   for(unsigned int map_iter=0; map_iter<landmark_list.size(); map_iter++ )
     {
       int id = landmark_list[map_iter].id_i;
-      double dx = x - landmark_list[map_iter].x_f;
-      double dy = y - landmark_list[map_iter].y_f;
-      if(dx * dx + dy * dy <= sensor_range * sensor_range) predicted.push_back(LandmarkObs {id, dx, dy});
+      double dx = abs(x - landmark_list[map_iter].x_f);
+      double dy = abs(y - landmark_list[map_iter].y_f);
+      if(dx <= sensor_range && dy <= sensor_range) predicted.push_back(LandmarkObs {id, landmark_list[map_iter].x_f, landmark_list[map_iter].y_f});
     }
+
   return predicted;
 
 }
@@ -166,15 +177,13 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
    *   (look at equation 3.33) http://planning.cs.uiuc.edu/node99.html
    */
   vector<Map::single_landmark_s> landmark_list = map_landmarks.landmark_list;
-  for(unsigned int i = 0; i< num_particles; i++)
+  for(int i = 0; i< num_particles; i++)
     {
-      double x = particles[i].x;
-      double y = particles[i].y;
-      double theta = particles[i].theta;
-      vector<LandmarkObs> predicted = predict_landmark(landmark_list, x, y, sensor_range);
-      vector<LandmarkObs> transformed_observations = transform_observations(observations, x, y, theta, sensor_range);
-      dataAssociation(predicted, transformed_observations);
       particles[i].weight = 1.0;
+      vector<LandmarkObs> transformed_observations = transform_observations(observations, particles[i]);
+      vector<LandmarkObs> predicted = predict_landmark(landmark_list, particles[i], sensor_range);      
+      dataAssociation(predicted, transformed_observations);
+      
       double dx = 0;
       double dy = 0; 
       for (unsigned int j=0; j< transformed_observations.size(); j++){
@@ -185,7 +194,7 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
            
           if (predicted[k].id == transformed_observations[j].id){
             found = true;
-            std::cout << "INFO: found the nearest landmark at id " << transformed_observations[j].id <<std::endl;
+            //std::cout << "INFO: found the nearest landmark at id " << transformed_observations[j].id <<std::endl;
           
         dx = predicted[k].x - transformed_observations[j].x;
         dy = predicted[k].y - transformed_observations[j].y;
@@ -205,7 +214,7 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
           particles[i].weight *= weight;
         
         }
-    std::cout<<"particle weight"<<particles[i].weight<<std::endl;
+    //std::cout<<"particle weight"<<particles[i].weight<<std::endl;
     }
   }
 
@@ -221,17 +230,17 @@ void ParticleFilter::resample() {
   std::random_device rd;
   std::mt19937 gen(rd());
   std::vector<double> weights;
-  for(unsigned int i=0; i< num_particles; i++){
-    std::cout<<particles[i].weight<<std::endl;
+  for(int i=0; i< num_particles; i++){
+    //std::cout<<particles[i].weight<<std::endl;
     weights.push_back(particles[i].weight);
   }
   
   std::discrete_distribution<> d(weights.begin(), weights.end());
   
   std::vector<Particle> old_particles = particles;
-  for (unsigned int i = 0; i< num_particles; i++){
+  for (int i = 0; i< num_particles; i++){
     unsigned int idx = d(gen);
-    std::cout<<"INFO: sampled particle of index: "<<idx<<"with weight: "<< weights[idx] <<std::endl;
+    //std::cout<<"INFO: sampled particle of index: "<<idx<<"with weight: "<< weights[idx] <<std::endl;
     particles[i] = old_particles[idx];
 
 
