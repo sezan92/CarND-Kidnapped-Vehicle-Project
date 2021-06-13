@@ -79,7 +79,7 @@ void ParticleFilter::prediction(double delta_t, double std_pos[],
     double y0 = particles[i].y;
     double theta0 = particles[i].theta;
     double new_x = x0 + velocity / yaw_rate * (sin( theta0 + yaw_rate * delta_t) - sin(theta0));
-    double new_y = y0 + velocity / yaw_rate * (cos( theta0 + yaw_rate * delta_t) - cos(theta0));
+    double new_y = y0 + velocity / yaw_rate * (-cos( theta0 + yaw_rate * delta_t) + cos(theta0));
     double new_theta = theta0 + yaw_rate * delta_t ; 
 
     normal_distribution<double> dist_x(new_x, std_pos[0]);
@@ -154,7 +154,7 @@ vector<LandmarkObs> ParticleFilter::predict_landmark(std::vector<Map::single_lan
       int id = landmark_list[map_iter].id_i;
       double dx = abs(x - landmark_list[map_iter].x_f);
       double dy = abs(y - landmark_list[map_iter].y_f);
-      if(dx <= sensor_range && dy <= sensor_range) predicted.push_back(LandmarkObs {id, landmark_list[map_iter].x_f, landmark_list[map_iter].y_f});
+      if(dx <= sensor_range && dy <= sensor_range) predicted.push_back(LandmarkObs {id, dx, dy});
     }
 
   return predicted;
@@ -198,7 +198,6 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
           
         dx = predicted[k].x - transformed_observations[j].x;
         dy = predicted[k].y - transformed_observations[j].y;
-        break;
           }
         
         
