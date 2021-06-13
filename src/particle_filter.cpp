@@ -23,7 +23,7 @@ using std::string;
 using std::vector;
 using std::normal_distribution;
 
-#define EPS 0.00000001
+#define EPS 0.0000000001
 void ParticleFilter::init(double x, double y, double theta, double std[]) {
   /**
    * TODO: Set the number of particles. Initialize all particles to 
@@ -232,13 +232,13 @@ void ParticleFilter::resample() {
    * NOTE: You may find std::discrete_distribution helpful here.
    *   http://en.cppreference.com/w/cpp/numeric/random/discrete_distribution
    */
-  std::random_device rd;
-  std::mt19937 gen(rd());
+
+  std::default_random_engine gen;
   std::discrete_distribution<> d(weights.begin(), weights.end());
   
   std::vector<Particle> old_particles = particles;
   for (int i = 0; i< num_particles; i++){
-    unsigned int idx = d(gen);
+    int idx = d(gen);
     //std::cout<<"INFO: sampled particle of index: "<<idx<<"with weight: "<< weights[idx] <<std::endl;
     particles[i] = old_particles[idx];
 
