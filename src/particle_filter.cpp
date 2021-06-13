@@ -23,7 +23,7 @@ using std::string;
 using std::vector;
 using std::normal_distribution;
 
-#define EPS 0.00001
+#define EPS 0.00000001
 void ParticleFilter::init(double x, double y, double theta, double std[]) {
   /**
    * TODO: Set the number of particles. Initialize all particles to 
@@ -180,7 +180,6 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
    *   (look at equation 3.33) http://planning.cs.uiuc.edu/node99.html
    */
   vector<Map::single_landmark_s> landmark_list = map_landmarks.landmark_list;
-  double weight_sum =0;
   for(int i = 0; i< num_particles; i++)
     {
       vector<LandmarkObs> transformed_observations = transform_observations(observations, particles[i]);
@@ -195,20 +194,16 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
         unsigned int k = 0;
         bool found = false;
       
-        while ( !found && k<predicted.size() ){
-           
-          if (predicted[k].id == transformed_observations[j].id){
+        while ( !found && k<predicted.size() )
+        {           
+          if (predicted[k].id == transformed_observations[j].id)
+          {
             found = true;
             //std::cout << "INFO: found the nearest landmark at id " << transformed_observations[j].id <<std::endl;
-          
-        dx = predicted[k].x - transformed_observations[j].x;
-        dy = predicted[k].y - transformed_observations[j].y;
+          dx = predicted[k].x - transformed_observations[j].x;
+          dy = predicted[k].y - transformed_observations[j].y;
           }
-        
-        
-
-
-      k++;
+        k++;
       }
         double weight = (1/(pow(sqrt(2 * M_PI * pow(std_landmark[0], 2) * pow(std_landmark[1], 2)), 2) )) * exp(-pow(dx, 2)/ (2 * pow(std_landmark[0], 2)) + (-pow(dy, 2)/ (2 * pow(std_landmark[1], 2))));
         if (weight == 0)
@@ -219,16 +214,12 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
         {
           particles[i].weight *= weight;
         
-        }
-
-      weight_sum += weight;
-      
+        }    
     
     //std::cout<<"particle weight"<<particles[i].weight<<std::endl;
       }
     }
   for(int i =0; i<num_particles; i++){
-    particles[i].weight /= weight_sum;
     weights[i] = particles[i].weight;
   }
 
