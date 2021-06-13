@@ -112,12 +112,14 @@ void ParticleFilter::dataAssociation(vector<LandmarkObs> predicted,
       distance =  dist(predicted[i].x, observations[j].x, predicted[i].y, observations[j].y);
       if (distance < min_distance){
         min_distance = distance;
-        min_iter_id = predicted[j].id;
+        min_iter_id = observations[i].id;
         std::cout<<"INFO:got minimum distance at "<< min_iter_id <<std::endl;  
             }
+      predicted[j].id = min_iter_id;
+      std::cout << "INFO: nearest landmark id for "<< observations[i].x << " "<< observations[i].y <<" is "<< observations[i].id << std::endl;
     }
-  observations[i].id = min_iter_id;
-  std::cout << "INFO: nearest landmark id for "<< observations[i].x << " "<< observations[i].y <<" is "<< observations[i].id << std::endl;
+  
+ 
   }
   
  
@@ -171,10 +173,7 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
       double theta = particles[i].theta;
       vector<LandmarkObs> predicted = predict_landmark(landmark_list, x, y, sensor_range);
       vector<LandmarkObs> transformed_observations = transform_observations(observations, x, y, theta, sensor_range);
-      std::cout<<"Predicted size "<< predicted.size() <<", Observations size "<< transformed_observations.size()<<std::endl;
       dataAssociation(predicted, transformed_observations);
-      std::cout<<"Predicted size "<< predicted.size() <<", Observations size "<< transformed_observations.size()<<std::endl;
-      //TODO: update weights using gaussian distribution
       particles[i].weight = 1.0;
       double dx = 0;
       double dy = 0; 
