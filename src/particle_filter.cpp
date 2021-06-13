@@ -153,10 +153,11 @@ vector<LandmarkObs> ParticleFilter::predict_landmark(std::vector<Map::single_lan
   
   for(unsigned int map_iter=0; map_iter<landmark_list.size(); map_iter++ )
     {
-      int id = landmark_list[map_iter].id_i;
-      double dx = abs(x - landmark_list[map_iter].x_f);
-      double dy = abs(y - landmark_list[map_iter].y_f);
-      if(dx <= sensor_range && dy <= sensor_range) predicted.push_back(LandmarkObs {id, dx, dy});
+      Map::single_landmark_s landmark = landmark_list[map_iter];
+      int id = landmark.id_i;
+      double dx = abs(x - landmark.x_f);
+      double dy = abs(y - landmark.y_f);
+      if(dx <= sensor_range && dy <= sensor_range) predicted.push_back(LandmarkObs {id, landmark.x_f, landmark.y_f});
     }
 
   return predicted;
