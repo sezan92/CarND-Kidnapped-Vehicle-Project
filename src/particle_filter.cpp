@@ -187,24 +187,25 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
       dataAssociation(predicted, transformed_observations);
       particles[i].weight=1.0;
       
-      double dx = 0;
-      double dy = 0; 
+      double dx = sensor_range;
+      double dy = sensor_range; 
       for (unsigned int j=0; j< transformed_observations.size(); j++)
       {
-        unsigned int k = 0;
-        bool found = false;
-      
-        while ( !found && k<predicted.size() )
+        LandmarkObs selected_pr;
+       
+        for (unsigned int k=0; k<predicted.size() ;k++)
         {           
           if (predicted[k].id == transformed_observations[j].id)
           {
-            found = true;
-            //std::cout << "INFO: found the nearest landmark at id " << transformed_observations[j].id <<std::endl;
-          dx = predicted[k].x - transformed_observations[j].x;
-          dy = predicted[k].y - transformed_observations[j].y;
+            
+          selected_pr = predicted[k];
+          dx = selected_pr.x - transformed_observations[j].x;
+          dy = selected_pr.y - transformed_observations[j].y;
+          std::cout<<"INFO: prediction x, and y: "<<selected_pr.x<<" "<<selected_pr.y<<std::endl;
+        
+          
           }
-        k++;
-      }
+        }
         double weight = (1/(pow(sqrt(2 * M_PI * pow(std_landmark[0], 2) * pow(std_landmark[1], 2)), 2) )) * exp(-pow(dx, 2)/ (2 * pow(std_landmark[0], 2)) + (-pow(dy, 2)/ (2 * pow(std_landmark[1], 2))));
         if (weight == 0)
         {
