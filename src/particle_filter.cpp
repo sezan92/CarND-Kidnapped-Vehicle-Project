@@ -117,10 +117,10 @@ void ParticleFilter::dataAssociation(vector<LandmarkObs> predicted,
       distance =  dist(predicted[i].x, predicted[i].y, observations[j].x, observations[j].y);
       if (distance < min_distance){
         min_distance = distance;
-        min_iter_id = observations[i].id;
+        min_iter_id = predicted[j].id;
         //std::cout<<"INFO:got minimum distance at "<< min_iter_id <<std::endl;  
             }
-    predicted[j].id = min_iter_id;
+    observations[i].id = min_iter_id;
       //std::cout << "INFO: nearest landmark id for "<< observations[i].x << " "<< observations[i].y <<" is "<< observations[i].id << std::endl;  
     }
     
@@ -180,15 +180,18 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
    *   (look at equation 3.33) http://planning.cs.uiuc.edu/node99.html
    */
   vector<Map::single_landmark_s> landmark_list = map_landmarks.landmark_list;
+  double weight_sum =0;
   for(int i = 0; i< num_particles; i++)
     {
       vector<LandmarkObs> transformed_observations = transform_observations(observations, particles[i]);
       vector<LandmarkObs> predicted = predict_landmark(landmark_list, particles[i], sensor_range);      
       dataAssociation(predicted, transformed_observations);
       particles[i].weight=1.0;
+      
       double dx = 0;
       double dy = 0; 
-      for (unsigned int j=0; j< transformed_observations.size(); j++){
+      for (unsigned int j=0; j< transformed_observations.size(); j++)
+      {
         unsigned int k = 0;
         bool found = false;
       
@@ -207,16 +210,26 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
 
       k++;
       }
-        double weight = (1/(sqrt(2 * M_PI * std_landmark[0] * std_landmark[1]) * sqrt( 2 * M_PI * std_landmark[0] * std_landmark[1])) * exp(-pow(dx, 2)/ 2 * pow(std_landmark[0], 2) ) * exp(-pow(dy, 2)/ 2 * pow(std_landmark[1], 2)));
-        if (weight == 0){
+        double weight = (1/(pow(sqrt(2 * M_PI * pow(std_landmark[0], 2) * pow(std_landmark[1], 2)), 2) )) * exp(-pow(dx, 2)/ (2 * pow(std_landmark[0], 2)) + (-pow(dy, 2)/ (2 * pow(std_landmark[1], 2))));
+        if (weight == 0)
+        {
           particles[i].weight *= EPS;
         }
-        else{
+        else
+        {
           particles[i].weight *= weight;
         
         }
+
+      weight_sum += weight;
+      
+    
     //std::cout<<"particle weight"<<particles[i].weight<<std::endl;
+      }
     }
+  for(int i =0; i<num_particles; i++){
+    particles[i].weight /= weight_sum;
+    weights[i] = particles[i].weight;
   }
 
 }
@@ -230,11 +243,6 @@ void ParticleFilter::resample() {
    */
   std::random_device rd;
   std::mt19937 gen(rd());
-  for(int i=0; i< num_particles; i++){
-    //std::cout<<particles[i].weight<<std::endl;
-    weights[i] = particles[i].weight;
-  }
-  
   std::discrete_distribution<> d(weights.begin(), weights.end());
   
   std::vector<Particle> old_particles = particles;
