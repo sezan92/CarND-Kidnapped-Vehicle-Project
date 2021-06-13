@@ -49,10 +49,9 @@ void ParticleFilter::init(double x, double y, double theta, double std[]) {
     particle.id = i ;
     particle.x = sample_x;
     particle.y = sample_y;
+    particle.theta = sample_theta;
     particle.weight = 1;
-    particle.sense_x.push_back(x);
-    particle.sense_y.push_back(y);
-
+    weights.push_back(particle.weight);
     //std::cout << "INFO: Sample " << i + 1 << " " << particle.x << " " << particle.y << " " << particle.theta << std::endl; 
 
     particles.push_back(particle);
@@ -137,7 +136,7 @@ vector<LandmarkObs> ParticleFilter::transform_observations(const vector<Landmark
   vector<LandmarkObs> transformed_observations;
   for (unsigned observe_iter=0; observe_iter < observations.size(); observe_iter++){
     double x_new = cos(theta) * observations[observe_iter].x - sin(theta) * observations[observe_iter].y + x;
-    double y_new = sin(theta) * observations[observe_iter].y - cos(theta) * observations[observe_iter].x + y;
+    double y_new = sin(theta) * observations[observe_iter].x + cos(theta) * observations[observe_iter].y + y;
     transformed_observations.push_back(LandmarkObs {observations[observe_iter].id, x_new, y_new});
   }
   return transformed_observations;
@@ -179,11 +178,10 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
   vector<Map::single_landmark_s> landmark_list = map_landmarks.landmark_list;
   for(int i = 0; i< num_particles; i++)
     {
-      particles[i].weight = 1.0;
       vector<LandmarkObs> transformed_observations = transform_observations(observations, particles[i]);
       vector<LandmarkObs> predicted = predict_landmark(landmark_list, particles[i], sensor_range);      
       dataAssociation(predicted, transformed_observations);
-      
+      particles[i].weight=1.0;
       double dx = 0;
       double dy = 0; 
       for (unsigned int j=0; j< transformed_observations.size(); j++){
@@ -228,10 +226,9 @@ void ParticleFilter::resample() {
    */
   std::random_device rd;
   std::mt19937 gen(rd());
-  std::vector<double> weights;
   for(int i=0; i< num_particles; i++){
     //std::cout<<particles[i].weight<<std::endl;
-    weights.push_back(particles[i].weight);
+    weights[i] = particles[i].weight;
   }
   
   std::discrete_distribution<> d(weights.begin(), weights.end());
