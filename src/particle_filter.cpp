@@ -22,7 +22,7 @@ using std::string;
 using std::vector;
 using std::normal_distribution;
 
-
+#define EPS 0.00001
 void ParticleFilter::init(double x, double y, double theta, double std[]) {
   /**
    * TODO: Set the number of particles. Initialize all particles to 
@@ -199,7 +199,14 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
       k++;
       }
         double weight = (1/(sqrt(2 * M_PI * std_landmark[0] * std_landmark[1]) * sqrt( 2 * M_PI * std_landmark[0] * std_landmark[1])) * exp(-pow(dx, 2)/ 2 * pow(std_landmark[0], 2) ) * exp(-pow(dy, 2)/ 2 * pow(std_landmark[1], 2)));
-        particles[i].weight *= weight; //TODO
+        if (weight == 0){
+          particles[i].weight *= EPS;
+        }
+        else{
+          particles[i].weight *= weight;
+        
+        }
+    std::cout<<"particle weight"<<particles[i].weight<<std::endl;
     }
   }
 
@@ -216,19 +223,21 @@ void ParticleFilter::resample() {
   std::mt19937 gen(rd());
   std::vector<double> weights;
   for(unsigned int i=0; i< num_particles; i++){
+    std::cout<<particles[i].weight<<std::endl;
     weights.push_back(particles[i].weight);
   }
+  
   std::discrete_distribution<> d(weights.begin(), weights.end());
   
-  std::vector<Particle> new_particles;
+  std::vector<Particle> old_particles = particles;
   for (unsigned int i = 0; i< num_particles; i++){
     unsigned int idx = d(gen);
-    new_particles[i] = particles[idx];
+    std::cout<<"INFO: sampled particle of index: "<<idx<<"with weight: "<< weights[idx] <<std::endl;
+    particles[i] = old_particles[idx];
 
 
   }
-  particles = new_particles;
-
+  
 }
 
 void ParticleFilter::SetAssociations(Particle& particle, 
