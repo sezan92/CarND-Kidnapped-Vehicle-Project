@@ -34,10 +34,11 @@ void ParticleFilter::init(double x, double y, double theta, double std[]) {
    *   (and others in this file).
    */
   //std::cout << "INFO: Initializing Particle Filter" << std::endl;
+  std::default_random_engine gen;
   normal_distribution<double> dist_x(x, std[0]);
   normal_distribution<double> dist_y(y, std[1]);
   normal_distribution<double> dist_theta(theta, std[2]);
-  std::default_random_engine gen;
+  
   num_particles = 20;  // TODO: Set the number of particles
   Particle particle;
   for (int i=0; i< num_particles; i++){
@@ -73,6 +74,7 @@ void ParticleFilter::prediction(double delta_t, double std_pos[],
    *  http://www.cplusplus.com/reference/random/default_random_engine/
    */
   //std::cout << "INFO: prediction step" << std::endl;
+  std::default_random_engine gen;
   for (int i=0; i < num_particles; i++){
     double x0 = particles[i].x;
     double y0 = particles[i].y;
@@ -84,7 +86,7 @@ void ParticleFilter::prediction(double delta_t, double std_pos[],
     normal_distribution<double> dist_x(new_x, std_pos[0]);
     normal_distribution<double> dist_y(new_y, std_pos[1]);
     normal_distribution<double> dist_theta(new_theta, std_pos[2]);
-    std::default_random_engine gen; 
+     
 
     particles[i].x = dist_x(gen);
     particles[i].y = dist_y(gen);
