@@ -39,7 +39,7 @@ void ParticleFilter::init(double x, double y, double theta, double std[]) {
   normal_distribution<double> dist_y(y, std[1]);
   normal_distribution<double> dist_theta(theta, std[2]);
   
-  num_particles = 100;  // TODO: Set the number of particles
+  num_particles = 20;  // TODO: Set the number of particles
   Particle particle;
   for (int i=0; i< num_particles; i++){
     double sample_x, sample_y, sample_theta;
@@ -79,8 +79,8 @@ void ParticleFilter::prediction(double delta_t, double std_pos[],
     double x0 = particles[i].x;
     double y0 = particles[i].y;
     double theta0 = particles[i].theta;
-    double new_x = x0 + velocity / yaw_rate * (sin( theta0 + yaw_rate * delta_t) - sin(theta0));
-    double new_y = y0 + velocity / yaw_rate * (-cos( theta0 + yaw_rate * delta_t) + cos(theta0));
+    double new_x = x0 + velocity / (yaw_rate + EPS) * (sin( theta0 + yaw_rate * delta_t) - sin(theta0));
+    double new_y = y0 + velocity / (yaw_rate + EPS) * (-cos( theta0 + yaw_rate * delta_t) + cos(theta0));
     double new_theta = theta0 + yaw_rate * delta_t ; 
 
     normal_distribution<double> dist_x(new_x, std_pos[0]);
@@ -114,7 +114,7 @@ void ParticleFilter::dataAssociation(vector<LandmarkObs> predicted,
     min_distance = __DBL_MAX__;
 ;
     for (unsigned int j=0; j<predicted.size(); j++){
-      distance =  dist(predicted[i].x, predicted[i].y, observations[j].x, observations[j].y);
+      distance =  dist(predicted[j].x, predicted[j].y, observations[i].x, observations[i].y);
       if (distance < min_distance){
         min_distance = distance;
         min_iter_id = predicted[j].id;
